@@ -3,6 +3,7 @@ import os
 from git import Repo
 
 import utils
+from utils import LogLevel
 import settings
 import githandler
 

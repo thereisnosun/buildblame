@@ -2,6 +2,11 @@ import time
 import datetime
 import re
 import sys
+from enum import Enum
+
+class LogLevel(Enum):
+	MANDATORY = 1,
+	DEBUG = 2
 
 SECONDS_IN_DAY = 86400
 
@@ -68,6 +73,30 @@ def findClosestNumber(numbers_list, number):
 	else:
 		return numbers_list[next_index]
 
+# Usage: first argument is log level, next arguments are refering to message to print
+def printMessage(*arg):
+	logLevel = None
+
+	args_list = list()
+	for argument in arg:
+		if type(argument) == LogLevel:
+			logLevel = argument
+		else:
+			args_list.append(argument)
+
+	if logLevel == None:
+		print("buildblame: Incorrect usage of printMessage function!")
+		return
+
+	#TODO: get loglevel
+	time_stamp = datetime.datetime.now().time().strftime("%d.%m.%y %H:%M")
+	logMessage = "buildblame[{}]: ".format(time_stamp)	
+	
+	for argument in args_list:
+		logMessage += argument
+		logMessage += " "
+
+	print(logMessage)
 
 
 	
