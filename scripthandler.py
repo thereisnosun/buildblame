@@ -3,6 +3,7 @@ import shutil
 import sys
 
 import utils
+from utils import LogLevel, printMessage
 
 def runScript(script, output_to_console=False):
 	try:
@@ -15,31 +16,31 @@ def runScript(script, output_to_console=False):
 		else:
 			return False
 	except subprocess.CalledProcessError as error:
-		print ("Error code is {}, output {}".format(error.returncode, error.output))
+		printMessage(LogLevel.MANDATORY, "Error code is {}, output {}".format(error.returncode, error.output))
 		return False
 
 def runBuildScript(script, out_dir, revision):
-	print ("Building {} ...".format(revision))
+	printMessage(LogLevel.INFO, "Building {} ...".format(revision))
 	sDate = utils.convertDate(revision.committed_date)
 	short_rev = str(revision)[0:7]
 	if runScript(script) == True:
 		new_dir = out_dir + "_" + short_rev + "_" + sDate
-		print ("Build script ran successfully. Moving dir binaries to {} ...".format(new_dir))
+		printMessage(LogLevel.MANDATORY, "Build script ran successfully. Moving dir binaries to {} ...".format(new_dir))
 		try:
 			shutil.copytree(out_dir, new_dir, symlinks=True)
-			print ("Binaries is successfully moved to {}".format(new_dir))
+			printMessage(LogLevel.INFO, "Binaries is successfully moved to {}".format(new_dir))
 			return new_dir
 		except:
-			print ("Caught exception ", sys.exc_info())
+			printMessage(LogLevel.MANDATORY, "Caught exception ", sys.exc_info())
 	else:
-		print ("Build failed for gitid [{}] date [{}]".format(revision, sDate))
+		printMessage(LogLevel.MANDATORY, "Build failed for gitid [{}] date [{}]".format(revision, sDate))
 		return None
 
 
 def runTestScript(script):
 	if runScript(script) == False:
-		print("Test failed")
+		printMessage(LogLevel.MANDATORY, "Test failed")
 		return False
 	else:
-		print("Test went successfully")
+		printMessage(LogLevel.MANDATORY, "Test went successfully")
 		return True

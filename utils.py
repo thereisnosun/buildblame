@@ -6,7 +6,8 @@ from enum import Enum
 
 class LogLevel(Enum):
 	MANDATORY = 1,
-	DEBUG = 2
+	INFO = 2,
+	DEBUG = 3
 
 SECONDS_IN_DAY = 86400
 
@@ -26,12 +27,12 @@ def checkDate(str_date, bIsMandatory = False):
 	match = re.findall("(\d+)\.(\d+)\.(\d+)", str_date) #TODO: check this pattern
 	if len(match) < 1:
 		if bIsMandatory:
-			print ("Wrong date format at all!")
+			printMessage (LogLevel.MANDATORY, "Wrong date format at all!")
 		return None
 
 	if len(match[0]) < 3:
 		if bIsMandatory:
-			print ("Wrong date format!")
+			printMessage (LogLevel.MANDATORY, "Wrong date format!")
 		return None
 
 	return match
@@ -41,19 +42,18 @@ def convertDateToSec(str_time):
 	match = checkDate(str_time, True)	
 	if match == None:
 		return 0
-	print (match[0][0], match[0][1], match[0][2])
+	printMessage (LogLevel.DEBUG, match[0][0], match[0][1], match[0][2])
 
 	try:
 		year, month, day = int(match[0][0]), int(match[0][1]), int(match[0][2])
 		time_zone = datetime.timezone(datetime.timedelta())
 		total_secs = datetime.datetime(year, month, day, tzinfo = time_zone).timestamp()
-		print(total_secs)
-		print(convertTimeDate(total_secs))
+		printMessage (LogLevel.DEBUG, convertTimeDate(total_secs))
 		return int(total_secs)
 	except ValueError as error:
-		print("Incorrect date format [{}]".format(error))
+		printMessage (LogLevel.MANDATORY, "Incorrect date format [{}]".format(error))
 	except:
-		print ("Unexpected error:", sys.exc_info()[0])
+		printMessage (LogLevel.MANDATORY, "Unexpected error:", sys.exc_info()[0])
 
 	return 0
 
@@ -89,7 +89,7 @@ def printMessage(*arg):
 		return
 
 	#TODO: get loglevel
-	time_stamp = datetime.datetime.now().time().strftime("%d.%m.%y %H:%M")
+	time_stamp = datetime.datetime.now().time().strftime("%d.%m.%y %H:%M") #time
 	logMessage = "buildblame[{}]: ".format(time_stamp)	
 	
 	for argument in args_list:

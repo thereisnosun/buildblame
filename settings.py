@@ -1,4 +1,5 @@
 import configparser
+from utils import LogLevel, printMessage
 
 DEFAULT_CONFIG_FILE = "config.ini"
 
@@ -25,7 +26,7 @@ def checkConfig(config_dict):
 	bIsArgsOk = True
 	for argument in mandatory_args:
 		if config_dict.get(argument) == None:
-			print("Please specify {} mandatory argument".format(argument))
+			printMessage(LogLevel.MANDATORY, "Please specify {} mandatory argument".format(argument))
 			bIsArgsOk = False
 
 	if not bIsArgsOk:
@@ -36,15 +37,15 @@ def checkConfig(config_dict):
 	if not find_last_working:
 		colect_builds = config_dict.get(COLLECT_BUILDS, True)
 		if config_dict.get(END_INTERVAL) == None:
-			print ("Only collect builds options is set. Please, specify end interval.")
+			printMessage(LogLevel.MANDATORY, "Only collect builds options is set. Please, specify end interval.")
 			return False
 	else:
 		colect_builds = config_dict.get(COLLECT_BUILDS, False)
 		if config_dict.get(LAST_WORK) == None:
-			print("Please specify the last date or gitid, when the version was stable")
+			printMessage(LogLevel.MANDATORY, "Please specify the last date or gitid, when the version was stable")
 			return False
 		if config_dict.get(TEST_SCRIPT) == None:
-			print ("You choose option to indetify broken systemversion. Plese specify script for testing")
+			printMessage(LogLevel.MANDATORY, "You choose option to indetify broken systemversion. Plese specify script for testing")
 			return False
 
 	return True
@@ -56,18 +57,19 @@ def parseConfig(configFile):
 
 	sections_list = config.sections()
 	if TEST_BUILD_SECTION not in sections_list:
-		print("Please check {} section".format(TEST_BUILD_SECTION))
+		printMessage(LogLevel.MANDATORY, "Please check {} section".format(TEST_BUILD_SECTION))
 		return None
 
 	if GIT_SECTION not in sections_list:
-		print("Please check {} section".format(GIT_SECTION))
+		printMessage(LogLevel.MANDATORY, "Please check {} section".format(GIT_SECTION))
 		return None
 
+	printMessage(LogLevel.DEBUG, "Config values are: ")
 	config_dict = dict()
 	for section in config:
 		for argument in config[section]:
 			value = config[section][argument]
-			#print(argument, "=", value)
+			printMessage(LogLevel.DEBUG, argument, "=", value)
 			if value == "YES":
 				config_dict[argument] = True
 			elif value == "NO":
