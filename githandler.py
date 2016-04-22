@@ -5,7 +5,7 @@ import shutil
 from enum import Enum
 
 import utils
-from utils import LogLevel, printMessage
+from bblogger import Logger, LogLevel
 import scripthandler
 import settings
 
@@ -18,46 +18,47 @@ class GitErrorType(Enum):
 	StashError = 2,
 	ErrorClean = 3,
 
+Log = Logger()
 
 def handleGitError(str_error):
 	lines_list = str(str_error).split('\n')
 	for line in lines_list:
 		if line.find(STR_STASH_ERROR) != -1:
-			printMessage (LogLevel.DEBUG, "Found stash")
+			Log.Log (LogLevel.DEBUG, "Found stash")
 			return GitErrorType.StashError
 		if line.find(STR_CLEAN_ERROR) != -1:
-			printMessage (LogLevel.DEBUG, "Found clear error")
+			Log.Log (LogLevel.DEBUG, "Found clear error")
 			return GitErrorType.ErrorClean
 	return GitErrorType.UknownError
 
 def getRevision(repo, rev_name, force = False):
 	try:
 		if type(rev_name) == git.refs.head.Head:
-			printMessage (LogLevel.MANDATORY, "Switching to ", rev_name)
+			Log.Log (LogLevel.MANDATORY, "Switching to ", rev_name)
 		else:
-			printMessage (LogLevel.MANDATORY, ("Switching to commit id {}, author {}, date {} ...").format(rev_name, rev_name.author, utils.convertTimeDate(rev_name.committed_date)))
+			Log.Log (LogLevel.MANDATORY, ("Switching to commit id {}, author {}, date {} ...").format(rev_name, rev_name.author, utils.convertTimeDate(rev_name.committed_date)))
 		repo.git.checkout(rev_name)
 	except git.exc.GitCommandError as error:
-		printMessage (LogLevel.MANDATORY, "Following error during checkout - [{}]".format(error))
+		Log.Log (LogLevel.MANDATORY, "Following error during checkout - [{}]".format(error))
 		gitError = handleGitError(error)
 
 		if gitError == GitErrorType.StashError:
 			try:
-				printMessage (LogLevel.MANDATORY, "Stashing...")
+				Log.Log (LogLevel.MANDATORY, "Stashing...")
 				repo.git.stash("save")
 				repo.git.checkout(rev_name)
 			except git.exc.GitCommandError as error:
-				printMessage (LogLevel.MANDATORY, "Following error during stash and checkout - [{}]".format(error))
+				Log.Log (LogLevel.MANDATORY, "Following error during stash and checkout - [{}]".format(error))
 		elif gitError == GitErrorType.ErrorClean and force:
 			try:
-				printMessage (LogLevel.MANDATORY, "Cleaning unversioned files...")
+				Log.Log (LogLevel.MANDATORY, "Cleaning unversioned files...")
 				repo.git.clean("-xdf")
 				repo.git.checkout(rev_name)
 			except git.exc.GitCommandError as error:
-				printMessage (LogLevel.MANDATORY, "Failed to get {} revision".format(rev_name))
+				Log.Log (LogLevel.MANDATORY, "Failed to get {} revision".format(rev_name))
 				return False
 		else:
-			printMessage (LogLevel.MANDATORY, "Error is currently unknown. Please check your git repo manually. Thanks for understanding")	
+			Log.Log (LogLevel.MANDATORY, "Error is currently unknown. Please check your git repo manually. Thanks for understanding")	
 			return
 
 	return True
@@ -100,10 +101,10 @@ def handleIndex(index, bIsFailed):
 
 def checkIndexExtreme(index):
 	if index >= len(all_commits):
-		printMessage(LogLevel.MANDATORY, "There are no working versions in the git range set")
+		Log.Log(LogLevel.MANDATORY, "There are no working versions in the git range set")
 		return False
 	if index < 0:
-		printMessage(LogLevel.MANDATORY, "All checked versions are working")
+		Log.Log(LogLevel.MANDATORY, "All checked versions are working")
 		return False
 
 	return True
@@ -121,7 +122,7 @@ def getLastWorkVersion(repo, config_dict, bKeepBuilds = False):
 	prev_index = len(all_commits)
 	index = int(prev_index / 2)
 	while bLoop:
-		printMessage(LogLevel.DEBUG, "prev_index {}, index {}".format(prev_index, index))
+		Log.Log(LogLevel.DEBUG, "prev_index {}, index {}".format(prev_index, index))
 		commit = all_commits[index]
 		if not getRevision(repo, commit, True if config_dict.get(settings.FORCE_PULL, '0') == '1' else False):
 			break
@@ -131,15 +132,15 @@ def getLastWorkVersion(repo, config_dict, bKeepBuilds = False):
 			continue
 		bCurrentCall = scripthandler.runTestScript(config_dict[settings.TEST_SCRIPT])
 		if not bCurrentCall:
-			printMessage(LogLevel.DEBUG, "Index is {}".format(abs(prev_index-index)))
+			Log.Log(LogLevel.DEBUG, "Index is {}".format(abs(prev_index-index)))
 			if bPreviosCall and abs(prev_index-index) == 1:
 				bLoop = False
-				printMessage(LogLevel.MANDATORY, "The last working version is {}".format(all_commits[prev_index]))	
-				printMessage(LogLevel.MANDATORY, "System is broken since {}, author {}, message '{}', date {}".format(commit, commit.author, commit.message, utils.convertTimeDate(commit.committed_date)))
+				Log.Log(LogLevel.MANDATORY, "The last working version is {}".format(all_commits[prev_index]))	
+				Log.Log(LogLevel.MANDATORY, "System is broken since {}, author {}, message '{}', date {}".format(commit, commit.author, commit.message, utils.convertTimeDate(commit.committed_date)))
 				break
 		else:
 			if not bPreviosCall and abs(prev_index-index)== 1:
-				printMessage(LogLevel.MANDATORY, "The previos call was successfull. This one breaks everything")
+				Log.Log(LogLevel.MANDATORY, "The previos call was successfull. This one breaks everything")
 			
 		bPreviosCall = bCurrentCall
 		prev_index = index
@@ -165,7 +166,7 @@ def getFirstDateCommit(repo, seconds):
 			commit_index += int(commit_index / 2)
 
 		if commit_index in index_list:
-			printMessage (LogLevel.MANDATORY, "Did not find commit for {} date. Will find the closest one for previous date {}".format(utils.convertTimeDate(seconds), utils.convertTimeDate(seconds - utils.SECONDS_IN_DAY)))
+			Log.Log (LogLevel.MANDATORY, "Did not find commit for {} date. Will find the closest one for previous date {}".format(utils.convertTimeDate(seconds), utils.convertTimeDate(seconds - utils.SECONDS_IN_DAY)))
 			seconds -= utils.SECONDS_IN_DAY
 			getFirstDateCommit(repo, seconds)
 			return
@@ -173,9 +174,9 @@ def getFirstDateCommit(repo, seconds):
 
 		if commit_index > len(all_commits) or commit_index < 0:
 			return
-		#printMessage (LogLevel.DEBUG,"Found commit id {} for commit date {}".format(all_commits[commit_index], utils.convertTimeDate(all_commits[commit_index].committed_date)))
+		#Log.Log (LogLevel.DEBUG,"Found commit id {} for commit date {}".format(all_commits[commit_index], utils.convertTimeDate(all_commits[commit_index].committed_date)))
 
 	commit = all_commits[commit_index]
-	printMessage(LogLevel.MANDATORY,"Git id is {}, author {}, message '{}', date {}".format(commit, commit.author, commit.message, utils.convertTimeDate(commit.committed_date)))
+	Log.Log(LogLevel.MANDATORY,"Git id is {}, author {}, message '{}', date {}".format(commit, commit.author, commit.message, utils.convertTimeDate(commit.committed_date)))
 	return commit
 
