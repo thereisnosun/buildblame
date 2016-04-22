@@ -36,17 +36,17 @@ def main():
 
 	collect_builds = config.get(settings.COLLECT_BUILDS)
 	last_work = config.get(settings.FIND_LAST_WORK)
-	# if last_work:
-	# 	printMessage (LogLevel.MANDATORY, "Will find the last working version")
-	# 	if collect_builds:
-	# 		printMessage (LogLevel.MANDATORY, "All builds will be kept")
-	# 	githandler.getLastWorkVersion(repo,config)
-	# else:
-	# 	printMessage (LogLevel.MANDATORY, "Will collect builds from given gitid range")
-	# 	githandler.collectBuilds(repo, config)
+	if last_work:
+		printMessage (LogLevel.MANDATORY, "Will find the last working version")
+		if collect_builds:
+			printMessage (LogLevel.MANDATORY, "All builds will be kept")
+		githandler.getLastWorkVersion(repo,config)
+	else:
+		printMessage (LogLevel.MANDATORY, "Will collect builds from given gitid range")
+		githandler.collectBuilds(repo, config)
 
-	# if active_branch != None:
-	# 	githandler.getRevision(repo, active_branch, True)
+	if active_branch != None:
+		githandler.getRevision(repo, active_branch, True)
 
 if __name__ == "__main__":
 	main()

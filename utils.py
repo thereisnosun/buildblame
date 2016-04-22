@@ -24,7 +24,7 @@ def convertDate(seconds):
 def checkDate(str_date, bIsMandatory = False):
 	if str_date == None:
 		return None
-	match = re.findall("(\d+)\.(\d+)\.(\d+)", str_date) #TODO: check this pattern
+	match = re.findall("(\d+)\.(\d+)\.(\d+)", str_date) 
 	if len(match) < 1:
 		if bIsMandatory:
 			printMessage (LogLevel.MANDATORY, "Wrong date format at all!")
