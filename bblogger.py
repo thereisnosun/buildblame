@@ -1,5 +1,6 @@
 from enum import IntEnum
 import datetime
+import utils
 
 class LogLevel(IntEnum):
 	MANDATORY = 1,
@@ -38,7 +39,9 @@ class Logger:
 		if currentLogLevel < self.logLevel:
 			return
 
-		time_stamp = datetime.datetime.now().time().strftime("%d.%m.%y %H:%M") #time
+		time_stamp_pos = datetime.datetime.now().timestamp()
+		time_stamp = utils.convertTimeDate(time_stamp_pos, True)
+
 		logMessage = "buildblame[{}]: ".format(time_stamp)	
 		
 		for argument in args_list:

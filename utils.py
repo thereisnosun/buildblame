@@ -8,9 +8,19 @@ SECONDS_IN_DAY = 86400
 
 Log = Logger()
 
-def convertTimeDate(seconds):
+
+def getMilis(seconds):
+	int_sec = int(seconds)
+	return int((seconds - int_sec)*100)
+
+def convertTimeDate(seconds, bgetMilis = False):
 	time_object = time.gmtime(seconds)
-	str_time = "{}-{}-{} {}:{}:{}".format(time_object.tm_year, time_object.tm_mon, time_object.tm_mday, time_object.tm_hour, time_object.tm_min, time_object.tm_sec)
+	if bgetMilis:
+		str_time = "{}-{}-{} {}:{}:{}:{}".format(time_object.tm_year, time_object.tm_mon, time_object.tm_mday,
+		 time_object.tm_hour, time_object.tm_min, time_object.tm_sec, getMilis(seconds))
+	else:	
+		str_time = "{}-{}-{} {}:{}:{}".format(time_object.tm_year, time_object.tm_mon, time_object.tm_mday, 
+			time_object.tm_hour, time_object.tm_min, time_object.tm_sec)
 	return str_time
 
 def convertDate(seconds):
