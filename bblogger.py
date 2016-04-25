@@ -7,18 +7,23 @@ class LogLevel(IntEnum):
 	INFO = 2,
 	DEBUG = 3
 
-#TODO: make it singleton
-class Logger:
+class Borg:
+    _shared_state = {}
+    def __init__(self):
+        self.__dict__ = self._shared_state
+
+class Logger(Borg):
 	logLevel = None
 
 	def __init__(self):
+		Borg.__init__(self)
 		self.logLevel = LogLevel.MANDATORY
 
 	def SetLogLevel(self, currentlogLevel):
 		if currentlogLevel == "1":
 			self.logLevel = LogLevel.MANDATORY
 		elif currentlogLevel == "2":
-			self.loglevel = LogLevel.INFO
+			self.logLevel = LogLevel.INFO
 		elif currentLogLevel == "3":
 			self.logLevel = LogLevel.DEBUG
 
