@@ -11,6 +11,7 @@ import settings
 
 
 STR_STASH_ERROR = "Please, commit your changes or stash them before you can merge."
+STR_STASH_ERROR_BRANCH = "Please, commit your changes or stash them before you can switch branches"
 STR_CLEAN_ERROR = "Please move or remove them before you can switch branches"
 
 class GitErrorType(Enum):
@@ -23,7 +24,7 @@ Log = Logger()
 def handleGitError(str_error):
 	lines_list = str(str_error).split('\n')
 	for line in lines_list:
-		if line.find(STR_STASH_ERROR) != -1:
+		if line.find(STR_STASH_ERROR) != -1 or line.find(STR_STASH_ERROR_BRANCH) != -1:
 			Log.Log (LogLevel.DEBUG, "Found stash")
 			return GitErrorType.StashError
 		if line.find(STR_CLEAN_ERROR) != -1:
