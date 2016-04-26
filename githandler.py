@@ -152,7 +152,6 @@ def getLastWorkVersion(repo, config_dict, bKeepBuilds = False):
 		if not bKeepBuilds:
 			shutil.rmtree(sBuildPath, True)
 
-
 #NOTE: the last commit has zero index 
 def getFirstDateCommit(repo, seconds):
 	all_commits = list(repo.iter_commits())
@@ -175,7 +174,7 @@ def getFirstDateCommit(repo, seconds):
 
 		if commit_index > len(all_commits) or commit_index < 0:
 			return
-		#Log.Log (LogLevel.DEBUG,"Found commit id {} for commit date {}".format(all_commits[commit_index], utils.convertTimeDate(all_commits[commit_index].committed_date)))
+		Log.Log (LogLevel.DEBUG,"Found commit id {} for commit date {}".format(all_commits[commit_index], utils.convertTimeDate(all_commits[commit_index].committed_date)))
 
 	commit = all_commits[commit_index]
 	Log.Log(LogLevel.MANDATORY,"Git id is {}, author {}, message '{}', date {}".format(commit, commit.author, commit.message, utils.convertTimeDate(commit.committed_date)))

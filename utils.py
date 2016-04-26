@@ -16,7 +16,7 @@ def getMilis(seconds):
 def convertTimeDate(seconds, bgetMilis = False):
 	time_object = time.gmtime(seconds)
 	if bgetMilis:
-		str_time = "{}-{}-{} {}:{}:{}:{}".format(time_object.tm_year, time_object.tm_mon, time_object.tm_mday,
+		str_time = "{}-{}-{} {}:{}:{}.{}".format(time_object.tm_year, time_object.tm_mon, time_object.tm_mday,
 		 time_object.tm_hour, time_object.tm_min, time_object.tm_sec, getMilis(seconds))
 	else:	
 		str_time = "{}-{}-{} {}:{}:{}".format(time_object.tm_year, time_object.tm_mon, time_object.tm_mday, 
